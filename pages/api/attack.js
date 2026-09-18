@@ -110,4 +110,4 @@ export default async function handler(req, res) {
     success: true, 
     message: isUltimate ? "ULTIMATE ATTACK INITIATED! 🚀" : "ATTACK STARTED! 🔥" 
   });
-}
+                  }
